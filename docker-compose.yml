@@ -1,0 +1,31 @@
+version: '2'
+
+networks:
+  app-tier:
+    driver: bridge
+
+services:
+  phpfpm:
+    image: 'bitnami/php-fpm:latest'
+    networks:
+      - app-tier
+    volumes:
+      - ./app:/app
+  nginx:
+    image: 'bitnami/nginx:latest'
+    depends_on:
+      - phpfpm
+    networks:
+      - app-tier
+    ports:
+      - '80:80'
+    volumes:
+      - ./server_block.conf:/opt/bitnami/nginx/conf/server_blocks/myapp.conf
+      - ./app:/app
+  mysql:
+    image: 'bitnami/mysql:latest'
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+      - MYSQL_DATABASE=chat
+    networks:
+      - app-tier

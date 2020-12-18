@@ -1,0 +1,50 @@
+#message-container {
+    overflow-y: auto;
+    overflow-x: hidden;
+    height: 500px;
+    min-height: 500px;
+}
+
+#add-message {
+    border: none;
+    width: 98%;
+    margin-left: -5px;
+}
+
+textarea:focus, input:focus{
+    outline: none;
+}
+
+#input-container {
+    border: 1px solid #DDD;
+    padding: 5px;
+    margin-left: 16px;
+    margin-top: 10px;
+}
+
+#message-container, #input-container {
+    max-width: 500px;
+    margin: auto;
+}
+
+.bold {
+    font-weight: bold;
+}
+
+@media screen and (max-width: 460px) {
+    #add-message {
+        width: 97%;
+    }
+}
+
+@media screen and (max-width: 325px) {
+    #add-message {
+        width: 96%;
+    }
+}
+
+@media screen and (max-width: 251px) {
+    #add-message {
+        width: 95%;
+    }
+}
