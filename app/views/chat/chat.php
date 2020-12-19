@@ -5,6 +5,7 @@
 use yii\helpers\Html;
 use yii\helpers\Url;
 use app\models\User;
+use app\models\Message;
 use app\assets\ChatAsset;
 use app\assets\FlaggedAsset;
 use app\assets\AppAsset;
@@ -13,10 +14,12 @@ $showFlagged = $flagged ?? false;
 AppAsset::register($this);
 if ($showFlagged) {
     FlaggedAsset::register($this);
-    list($this->title, $noMessages) = ['Помеченные сообщения', 'Нет помеченных сообщений.'];
+    $confirm = Message::FLAGGED['confirm'];
+    list($this->title, $noMessages) = [Message::FLAGGED['title'], Message::FLAGGED['empty']];
 } else {
     ChatAsset::register($this);
-    list($this->title, $noMessages) = ['Чат', 'Еще никто не отправил сообщение.'];
+    $confirm = Message::CHAT['confirm'];
+    list($this->title, $noMessages) = [Message::CHAT['title'], Message::CHAT['empty']];
 }
 $currentUserId = Yii::$app->user->id;
 $currentUsername = User::getUsernameById($currentUserId);
@@ -27,7 +30,8 @@ $currentIsAdmin = User::isAdminById($currentUserId);
         <h1><?= Html::encode($this->title) ?></h1>
     </div>
     <div class="body-content">
-        <div id="message-container" data-isflagged="<?=$showFlagged?>" data-flag-url="<?=Url::to(['chat/flag'])?>">
+        <div id="message-container" data-isflagged="<?=$showFlagged?>" data-flag-url="<?=Url::to(['chat/flag'])?>"
+            data-confirm="<?=$confirm?>" data-empty="<?=$noMessages?>">
             <?php
                 if (count($messages)):
                      foreach ($messages as $message):

@@ -2,18 +2,19 @@ function scrollDown() {
 	document.getElementById('message-container').scrollTo(0, document.body.scrollHeight);
 }
 
-function alterFlag(confirmMessage, noMessages, flagParam, scope) {
+function alterFlag(flagParam, scope) {
+	let messageContainerData = $('#message-container').data();
 	let id = scope.closest('.message-item').data('id');
 	if (!id) {
 		alert('Пожалуйста, перезагрузите страницу.');
 		return;
 	}
-	if (!confirm(confirmMessage)) return;
+	if (!confirm(messageContainerData.confirm)) return;
 
 	$.ajax({
 		async: true,
 		type: "POST",
-		url: $('#message-container').data('flag-url'),
+		url: messageContainerData['flagUrl'],
 		dataType: 'json',
 		data: {id: id, flagged: flagParam},
 		cache: false,
@@ -24,7 +25,7 @@ function alterFlag(confirmMessage, noMessages, flagParam, scope) {
 			if (messages.length === 1) {
 				$('#message-container').append(`
 					<div class="row" id="no-messages">
-						<div class="col-xs-12">${noMessages}</div>
+						<div class="col-xs-12">${messageContainerData.empty}</div>
 					</div>
 				`);
 			}	

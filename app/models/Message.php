@@ -9,6 +9,17 @@ use app\models\User;
 
 class Message extends \yii\db\ActiveRecord
 {
+	const CHAT = [
+		'title' => 'Чат',
+		'empty' => 'Еще никто не отправил сообщение.',
+		'confirm' => 'Вы уверены, что хотите пометить это сообщение?',
+	];
+	const FLAGGED = [
+		'title' => 'Помеченные сообщения',
+		'empty' => 'Нет помеченных сообщений.',
+		'confirm' => 'Вы уверены, что хотите вернуть это сообщение в чат?',
+	];
+	
 	/**
 	 * @return array the validation rules.
 	 */
