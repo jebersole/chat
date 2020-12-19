@@ -127,6 +127,7 @@ class ChatController extends Controller
     private function saveModel($model, &$response, $modelName = '') {
         if ($model->save()) {
             $response->statusCode = $modelName === 'сообщение' ? 201 : 200;
+            $response->data = ['id' => $model->id ?: 0];
         } else {
             $response->statusCode = 500;
             $response->data = ['message' => "Невозможно сохранить $modelName."];
