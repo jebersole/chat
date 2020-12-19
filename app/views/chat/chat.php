@@ -1,6 +1,5 @@
 <?php
 
-opcache_reset();
 /* @var $this yii\web\View */
 
 use yii\helpers\Html;
