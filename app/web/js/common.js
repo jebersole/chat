@@ -2,13 +2,13 @@ function scrollDown() {
 	document.getElementById('message-container').scrollTo(0, document.body.scrollHeight);
 }
 
-function alterFlag(confirmMessage, flagParam, scope) {
+function alterFlag(confirmMessage, noMessages, flagParam, scope) {
 	let id = scope.closest('.message-item').data('id');
 	if (!id) {
 		alert('Пожалуйста, перезагрузите страницу.');
 		return;
 	}
-	if(!confirm(confirmMessage)) return;
+	if (!confirm(confirmMessage)) return;
 
 	$.ajax({
 		async: true,
@@ -19,7 +19,15 @@ function alterFlag(confirmMessage, flagParam, scope) {
 		cache: false,
 		global: false,
 		success: function () {
-			$('.message-item').filter(`[data-id='${id}']`).remove();
+			let messages = $('.message-item');
+			messages.filter(`[data-id='${id}']`).remove();
+			if (messages.length === 1) {
+				$('#message-container').append(`
+					<div class="row" id="no-messages">
+						<div class="col-xs-12">${noMessages}</div>
+					</div>
+				`);
+			}	
 		},
 		error: function (jqXHR) {
 			var errorStr;

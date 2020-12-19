@@ -19,7 +19,7 @@ $(function() {
 	$(function() {
 		$('#message-container').on('click', '.flag-message', function() {
 			let that = $(this);
-			alterFlag("Помечать сообщение?", 1, that);
+			alterFlag("Помечать сообщение?", 'Еще никто не отправил сообщение.', 1, that);
 		});
 	});
 
