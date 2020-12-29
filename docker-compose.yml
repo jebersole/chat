@@ -11,6 +11,8 @@ services:
       - app-tier
     volumes:
       - ./app:/app
+    ports:
+      - '7000:7000'
   nginx:
     image: 'bitnami/nginx:latest'
     depends_on:
@@ -18,7 +20,7 @@ services:
     networks:
       - app-tier
     ports:
-      - '80:80'
+      - '8080:8080'
     volumes:
       - ./server_block.conf:/opt/bitnami/nginx/conf/server_blocks/myapp.conf
       - ./app:/app

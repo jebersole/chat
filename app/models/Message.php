@@ -2,19 +2,18 @@
 
 namespace app\models;
 
-use yii\db\ActiveRecord;
 use yii\behaviors\TimestampBehavior;
 use yii\db\Expression;
 use app\models\User;
 
 class Message extends \yii\db\ActiveRecord
 {
-    const CHAT = [
+    static $chat = [
         'title' => 'Чат',
         'empty' => 'Еще никто не отправил сообщение.',
         'confirm' => 'Вы уверены, что хотите пометить это сообщение?',
     ];
-    const FLAGGED = [
+    static $flagged = [
         'title' => 'Помеченные сообщения',
         'empty' => 'Нет помеченных сообщений.',
         'confirm' => 'Вы уверены, что хотите вернуть это сообщение в чат?',
@@ -51,4 +50,14 @@ class Message extends \yii\db\ActiveRecord
     {
         return $this->hasOne(User::className(), ['id' => 'user_id']);
     }
+
+    public static function getMessages($flagged = false)
+    {
+        return self::find()
+            ->where(['flagged' => $flagged])
+            ->with('user')
+            ->orderBy('created_at ASC')
+            ->all();
+    }
+
 }

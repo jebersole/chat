@@ -7,9 +7,16 @@ use yii\web\Controller;
 use yii\web\Response;
 use app\models\Message;
 use app\models\User;
+use app\helpers\MessageHelper;
 
 class ChatController extends Controller
 {
+
+    const FAILED_SAVE = 'Невозможно сохранить %s.';
+    const FLAG_MODEL = 'флаг';
+    const MESSAGE_MODEL = 'сообщение';
+    const MESSAGE_NOT_FOUND = 'Сообщение не найдено.';
+
     /**
      * {@inheritdoc}
      */
@@ -29,11 +36,32 @@ class ChatController extends Controller
      */
     public function actionList()
     {
-        $messages = $this->getMessages(false);
+        $data = $this->getData(false);
+        $messages = Message::getMessages(false);
         return $this->render('chat', [
             'messages' => $messages,
-            'flagged' => false
+            'showFlagged' => false,
+            'data' => $data
         ]);
+    }
+
+    /**
+     * Get data for chat view.
+     *
+     * @return array
+     */
+    private function getData($showFlagged)
+    {
+        $userId = Yii::$app->user->id;
+        $data = [
+            'currentUsername' => User::getUsernameById($userId),
+            'currentIsAdmin' => User::isAdminById($userId),
+        ];
+        $messageType = $showFlagged ? 'flagged' : 'chat';
+        foreach (['confirm', 'title', 'empty'] as $key) {
+            $data[$key] = Message::$$messageType[$key];
+        }
+        return $data;
     }
 
     /**
@@ -45,16 +73,18 @@ class ChatController extends Controller
     {
         $userId = (int) Yii::$app->user->id;
         if ($userId && User::isAdminById($userId)) {
-            $messages = $this->getMessages(true);
+            $messages = Message::getMessages(true);
         } else {
             return $this->render('/site/error', [
-                'message' => 'У вас нет разрешения на доступ к этому ресурсу.',
-                'name' => 'Нет разрешения'
+                'message' => MessageHelper::UNAUTHORIZED,
+                'name' => MessageHelper::UNAUTHORIZED_SHORT
             ]);
         }
+        $data = $this->getData(true);
         return $this->render('chat', [
             'messages' => $messages,
-            'flagged' => true
+            'showFlagged' => true,
+            'data' => $data
         ]);
     }
 
@@ -65,17 +95,18 @@ class ChatController extends Controller
      */
     public function actionAdd()
     {
+        $request = Yii::$app->request;
         list($userId, $response) = $this->initResponse();
         if ($userId) {
             $model = new Message();
             $model->user_id = $userId;
-            $model->text = $_POST['text'] ?? '';
+            $model->text = $request->post('text');
             if (!$model->validate()) {
                 $response->statusCode = 400;
                 $response->data = ['errors' => array_values($model->errors)];
                 return $response;
             }
-            $this->saveModel($model, $response, 'сообщение');
+            $this->saveModel($model, $response, self::MESSAGE_MODEL);
         } else {
             $this->addForbidden($response);
         }
@@ -89,33 +120,23 @@ class ChatController extends Controller
      */
     public function actionFlag()
     {
+        $request = Yii::$app->request;
         list($userId, $response) = $this->initResponse();
         if ($userId && User::isAdminById($userId)) {
-            $id = (int) $_POST['id'] ?? '';
-            $flag = isset($_POST['flagged']) ? boolval($_POST['flagged']) : false;
+            $id = (int) $request->post('id');
+            $flag = $request->post('flagged') ? boolval($request->post('flagged')) : false;
             $model = Message::findOne($id);
             if (!$model) {
                 $response->statusCode = 400;
-                $response->data = ['message' => 'Сообщение не найдено.'];
+                $response->data = ['message' => self::MESSAGE_NOT_FOUND];
                 return $response;
             }
             $model->flagged = $flag;
-            $this->saveModel($model, $response, 'флаг');
+            $this->saveModel($model, $response, self::FLAG_MODEL);
         } else {
             $this->addForbidden($response);
         }
         return $response;
-    }
-
-	/**
-	 * @return \yii\db\ActiveRecord[]
-	 */
-    private function getMessages($flagged = false) {
-        return Message::find()
-            ->where(['flagged' => $flagged])
-            ->with('user')
-            ->orderBy('created_at ASC')
-            ->all();
     }
 
     /**
@@ -124,13 +145,14 @@ class ChatController extends Controller
      * @param string $modelName
      * @return void
      */
-    private function saveModel($model, &$response, $modelName = '') {
+    private function saveModel($model, &$response, $modelName = '')
+    {
         if ($model->save()) {
-            $response->statusCode = $modelName === 'сообщение' ? 201 : 200;
+            $response->statusCode = $modelName === self::MESSAGE_MODEL ? 201 : 200;
             $response->data = ['id' => $model->id ?: 0];
         } else {
             $response->statusCode = 500;
-            $response->data = ['message' => "Невозможно сохранить $modelName."];
+            $response->data = ['message' => sprintf(self::FAILED_SAVE, $modelName)];
         }
     }
 
@@ -138,9 +160,10 @@ class ChatController extends Controller
      * @param Response $response
      * @return void
      */
-    private function addForbidden(&$response) {
+    private function addForbidden(&$response)
+    {
         $response->statusCode = 401;
-        $response->data = ['message' => 'Действие запрещено. Вы вошли в систему?'];
+        $response->data = ['message' => MessageHelper::UNAUTHORIZED];
     }
 
     /**
@@ -149,7 +172,7 @@ class ChatController extends Controller
     private function initResponse() {
         $userId = (int) Yii::$app->user->id;
         $response = Yii::$app->response;
-        $response->format = \yii\web\Response::FORMAT_JSON;
+        $response->format = Response::FORMAT_JSON;
         return [$userId, $response];
     }
 

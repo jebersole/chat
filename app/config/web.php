@@ -5,8 +5,8 @@ $db = require __DIR__ . '/db.php';
 
 $config = [
     'id' => 'basic',
-	'name' => 'Чат',
-	'language' => 'ru-RU',
+    'name' => 'Чат',
+    'language' => 'ru-RU',
     'basePath' => dirname(__DIR__),
     'bootstrap' => ['log'],
     'aliases' => [
@@ -49,17 +49,19 @@ $config = [
             'enablePrettyUrl' => true,
             'showScriptName' => false,
             'rules' => [
-				'/' => 'chat/list',
-				'/chat/add' => 'chat/add',
-				'/chat/flag' => 'chat/flag',
-				'/chat/flagged' => 'chat/flagged',
+                '/' => 'chat/list',
+                '/chat/add' => 'chat/add',
+                '/chat/flag' => 'chat/flag',
+                '/chat/flagged' => 'chat/flagged',
+                '/users' => 'site/list-users',
+				'/users/role' => 'site/change-user-role',
 			],
         ],
-		'authManager' => [
-			'class' => 'yii\rbac\DbManager',
-			// uncomment if you want to cache RBAC items hierarchy
-			// 'cache' => 'cache',
-		],
+        'authManager' => [
+            'class' => 'yii\rbac\DbManager',
+            // uncomment if you want to cache RBAC items hierarchy
+            // 'cache' => 'cache',
+        ],
     ],
     'params' => $params,
 ];
